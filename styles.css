@@ -29,11 +29,13 @@ body {
 }
 
 .title {
-  width: 85%;
+  width: 90%;
 }
 
 .delete {
   font-size: 22px;
+  position: relative;
+  top: 3px;
 }
 
 /*.label {

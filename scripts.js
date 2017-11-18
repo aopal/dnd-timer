@@ -4,19 +4,7 @@ function addTimer(uuid = null) {
   uuid = uuid || uuidv4();
 
   parent = document.createElement("div");
-  parent.innerHTML =
-  `<input type="text" class="title" />
-  <span onclick="deleteTimer('${uuid}')" class="delete">&times</span>
-  <div id="timer${uuid}">0d 0h 0m 0s</div>
-  <input class="time" type="text" id="hour${uuid}"/>
-  <input class="time" type="text" id="minute${uuid}"/>
-  <input class="time" type="text" id="second${uuid}"/>
-  <button onclick="startTimer('${uuid}')">Start</button>
-  <button onclick="stopTimer('${uuid}')">Stop</button>
-  <button class="addLabel" onclick="addLabel('${uuid}')">Add label</button>
-  <input type="text" class="label" />
-  <input type="text" class="label" />
-  <input type="text" class="label" />`;
+  parent.innerHTML = `<input type="text" class="title label" /><span onclick="deleteTimer('${uuid}')" class="delete">&times</span><div id="timer${uuid}">0d 0h 0m 0s</div><input class="time" type="text" id="hour${uuid}"/><input class="time" type="text" id="minute${uuid}"/><input class="time" type="text" id="second${uuid}"/><button onclick="startTimer('${uuid}')">Start</button><button onclick="stopTimer('${uuid}')">Stop</button><button class="addLabel" onclick="addLabel('${uuid}')">Add label</button><input type="text" class="label" /><input type="text" class="label" /><input type="text" class="label" />`;
   parent.className = "timerContainer";
   parent.id = `timerContainer${uuid}`;
 
@@ -26,7 +14,18 @@ function addTimer(uuid = null) {
 function deleteTimer(uuid) {
   elem = document.getElementById('timerContainer' + uuid);
   elem.parentNode.removeChild(elem);
-  deleteCookie('timer' + uuid)
+  deleteCookie("timer" + uuid)
+  deleteCookie("timerLabels" + uuid)
+}
+
+function saveLabels(uuid) {
+  parent = document.getElementById("timerContainer" + uuid);
+  labels = parent.getElementsByClassName("label");
+  vals = Array.from(labels).map(function(label) {
+    return label.value;
+  });
+
+  setCookie("timerLabels" + uuid, JSON.stringify(vals), 1000000)
 }
 
 function startTimer(uuid) {
@@ -57,6 +56,7 @@ function stopTimer(uuid) {
 function addInterval(uuid) {
   // Update the count down every 1 second
   intervals[uuid] = setInterval(function() {
+    saveLabels(uuid);
     document.getElementById("timer" + uuid).style = "color: black";
 
     // Get todays date and time
@@ -117,7 +117,7 @@ function getCookie(cname) {
 }
 
 function deleteCookie (cname) {
-  document.cookie = cname + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  document.cookie = cname + '=0;expires=Thu, 01 Jan 1970 00:00:01 GMT;path=/';
 }
 
 function loadTimersFromCookies(){
@@ -129,7 +129,24 @@ function loadTimersFromCookies(){
     uuid = match_arr[1];
     addTimer(uuid);
     addInterval(uuid);
+    loadLabelsFromCookies(uuid);
   });
+}
+
+function loadLabelsFromCookies(uuid) {
+  labels = JSON.parse(getCookie("timerLabels" + uuid))
+  labels = labels.filter(function(label) {return label.length})
+
+  labelsToAdd = labels.length - 4;
+  for(var i = 0; i < labelsToAdd; i++)
+    addLabel(uuid);
+  
+  parent = document.getElementById("timerContainer" + uuid);
+  labelElems = parent.getElementsByClassName("label");
+
+  for(var i = 0; i < labels.length; i++) {
+    labelElems[i].value = labels[i]
+  }
 }
 
 function uuidv4() {
