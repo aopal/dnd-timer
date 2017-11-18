@@ -22,11 +22,18 @@ body {
   border: 1px solid black;
   width: 175px;
   padding: 2px;
-  font-weight:
 }
 
 .addLabel {
   width: 171px;
+}
+
+.title {
+  width: 85%;
+}
+
+.delete {
+  font-size: 22px;
 }
 
 /*.label {
